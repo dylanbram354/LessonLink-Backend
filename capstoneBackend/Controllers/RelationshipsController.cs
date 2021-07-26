@@ -31,7 +31,8 @@ namespace Capstone_Backend.Controllers
                 teacherId = r.TeacherId,
                 studentId = r.StudentId,
                 teacherUsername = r.Teacher.UserName,
-                studentUsername = r.Student.UserName
+                studentUsername = r.Student.UserName,
+                balance = r.Balance
             });
             if (result == null)
             {
@@ -121,5 +122,30 @@ namespace Capstone_Backend.Controllers
                 return BadRequest();
             }
         }
+
+        [HttpPut("update_balance"), Authorize(Roles = "Teacher")]
+
+        public IActionResult UpdateStudentBalance([FromBody] Relationship body)
+        {
+            var myId = User.FindFirstValue("id");
+            var relationship = _context.Relationships.Where(r => r.TeacherId == myId && r.StudentId == body.StudentId).SingleOrDefault();
+            if (relationship == null)
+            {
+                return StatusCode(401, "Not your student.");
+            }
+            relationship.Balance = body.Balance;
+            _context.SaveChanges();
+            var returnInfo = _context.Relationships.Where(r => r.TeacherId == myId && r.StudentId == body.StudentId).Include(r => r.Teacher).Include(r => r.Student).Select(r => new
+            {
+                relationshipId = r.RelationshipId,
+                teacherId = r.TeacherId,
+                studentId = r.StudentId,
+                teacherUsername = r.Teacher.UserName,
+                studentUsername = r.Student.UserName,
+                balance = r.Balance
+            }).SingleOrDefault();
+            return Ok(returnInfo);
+        }
+
     }
 }

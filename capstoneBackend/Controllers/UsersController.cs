@@ -76,22 +76,5 @@ namespace capstoneBackend.Controllers
             var foundUser = _context.Users.Where(u => u.Id == user.Id).SingleOrDefault();
             return Ok(foundUser);
         }
-
-        [HttpPut("student/update_balance"), Authorize(Roles = "Teacher")]
-
-        public IActionResult UpdateStudentBalance([FromBody] User student)
-        {
-            var myId = User.FindFirstValue("id");
-            var relationship = _context.Relationships.Where(r => r.TeacherId == myId && r.StudentId == student.Id);
-            if (relationship == null)
-            {
-                return StatusCode(401, "Not your student.");
-            }
-            var studentToEdit = _context.Users.Where(u => u.Id == student.Id).SingleOrDefault();
-            studentToEdit.Balance = student.Balance;
-            _context.SaveChanges();
-            var returnStudent = _context.Users.Where(u => u.Id == student.Id).SingleOrDefault();
-            return Ok(returnStudent);
-        }
     }
 }

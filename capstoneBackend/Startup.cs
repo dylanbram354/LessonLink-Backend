@@ -33,15 +33,6 @@ namespace capstoneBackend
             services.ConfigureJWT(Configuration);
             services.AddScoped<IAuthenticationManager, AuthenticationManager>();
             services.AddControllers();
-            //services.AddCors(options =>
-            //{
-            //    options.AddPolicy("Policy1", builder =>
-            //    {
-            //        builder.WithOrigins("http://localhost:3000").
-            //        WithMethods("POST", "GET", "PUT", "DELETE")
-            //        .WithHeaders(HeaderNames.ContentType);
-            //    });
-            //});
             services.AddCors(options =>
             {
                 options.AddPolicy("Policy1", builder =>

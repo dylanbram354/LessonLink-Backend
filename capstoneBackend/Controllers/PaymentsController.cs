@@ -37,6 +37,7 @@ namespace capstoneBackend.Controllers
         {
             var myId = User.FindFirstValue("id");
             var relationshipId = _context.Relationships.Where(r => r.TeacherId == myId && r.StudentId == paymentSubmission.StudentId).Select(r => r.RelationshipId).SingleOrDefault();
+            var relationship = _context.Relationships.Where(r => r.RelationshipId == relationshipId).SingleOrDefault();
             var student = _context.Relationships.Where(r => r.RelationshipId == relationshipId).Include(r => r.Student).Select(r => r.Student).SingleOrDefault();
             var date = DateTime.Now;
             if (relationshipId != 0)
@@ -49,9 +50,9 @@ namespace capstoneBackend.Controllers
                     MethodId = paymentSubmission.MethodId
                 };
                 _context.Payments.Add(payment);
-                student.Balance -= paymentSubmission.Amount;
+                relationship.Balance -= paymentSubmission.Amount;
                 _context.SaveChanges();
-                var returnItem = _context.Payments.Where(p => p.PaymentId == payment.PaymentId).Include(p => p.Method).Include(p => p.Relationship.Student).Select(p => new 
+                var returnItem = _context.Payments.Where(p => p.PaymentId == payment.PaymentId).Include(p => p.Method).Include(p => p.Relationship).Include(p => p.Relationship.Student).Select(p => new 
                 {
                     PaymentId = p.PaymentId,
                     Amount = p.Amount,
@@ -59,6 +60,7 @@ namespace capstoneBackend.Controllers
                     RelationshipId = p.RelationshipId,
                     MethodId = p.MethodId,
                     MethodName = p.Method.Name,
+                    Balance = p.Relationship.Balance,
                     Student = p.Relationship.Student
                 }).SingleOrDefault();
                 return StatusCode(201, returnItem);
