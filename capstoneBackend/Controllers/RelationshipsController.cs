@@ -40,20 +40,86 @@ namespace Capstone_Backend.Controllers
             return Ok(result);
         }
 
-        [HttpPost(), Authorize(Roles ="Student")]
+        [HttpPost(), Authorize]
 
-        public IActionResult PostNewRelationshipAsStudent([FromBody] User teacher)
+        public IActionResult PostNewRelationshipAsStudent([FromBody] User partner)
         {
             var userId = User.FindFirstValue("id");
-            var teacherId = teacher.Id;
-            Relationship newRelationship = new Relationship
+            var partnerId = partner.Id;
+            try
             {
-                StudentId = userId,
-                TeacherId = teacherId
-            };
-            _context.Relationships.Add(newRelationship);
-            _context.SaveChanges();
-            return Ok(newRelationship);
+                if (User.IsInRole("Student"))
+                {
+                    Relationship newRelationship = new Relationship
+                    {
+                        StudentId = userId,
+                        TeacherId = partnerId
+                    };
+                    _context.Relationships.Add(newRelationship);
+                    _context.SaveChanges();
+                    return Ok(newRelationship);
+                }
+                else
+                {
+                    Relationship newRelationship = new Relationship
+                    {
+                        StudentId = partnerId,
+                        TeacherId = userId
+                    };
+                    _context.Relationships.Add(newRelationship);
+                    _context.SaveChanges();
+                    return Ok(newRelationship);
+                }
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+            
+            
+        }
+
+        [HttpDelete("breakup"), Authorize]
+
+        public IActionResult RemoveRelationship([FromBody] User partner)
+        {
+            try
+            {
+                if (User.IsInRole("Student"))
+                {
+                    var userId = User.FindFirstValue("id");
+                    var relationship = _context.Relationships.Where(r => (r.StudentId == userId) && (r.TeacherId == partner.Id)).SingleOrDefault();
+                    if (relationship != null)
+                    {
+                        _context.Remove(relationship);
+                        _context.SaveChanges();
+                        return StatusCode(204);
+                    }
+                    else
+                    {
+                        return StatusCode(404);
+                    }
+                }
+                else
+                {
+                    var userId = User.FindFirstValue("id");
+                    var relationship = _context.Relationships.Where(r => (r.TeacherId == userId) && (r.StudentId == partner.Id)).SingleOrDefault();
+                    if (relationship != null)
+                    {
+                        _context.Remove(relationship);
+                        _context.SaveChanges();
+                        return StatusCode(204);
+                    }
+                    else
+                    {
+                        return StatusCode(404);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
     }
 }

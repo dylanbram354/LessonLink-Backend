@@ -72,22 +72,32 @@ namespace capstoneBackend.Controllers
         [HttpGet("download"), Authorize]
         public async Task<ActionResult> DownloadFile([FromBody] Document doc)
         {
+            var userId = User.FindFirstValue("id");
+            var userRelationshipIds = _context.Relationships.Where(r => r.StudentId == userId || r.TeacherId == userId).Select(r => r.RelationshipId).ToList();
             var docToDownload = _context.Documents.Where(d => d.DocumentId == doc.DocumentId).SingleOrDefault();
-            var provider = new FileExtensionContentTypeProvider();
-            try
+            if (userRelationshipIds.Contains(docToDownload.RelationshipId))
             {
-                string contentType;
-                if (!provider.TryGetContentType(docToDownload.DocumentName, out contentType))
+                var provider = new FileExtensionContentTypeProvider();
+                try
                 {
-                    contentType = "application/octet-stream";
+                    string contentType;
+                    if (!provider.TryGetContentType(docToDownload.DocumentName, out contentType))
+                    {
+                        contentType = "application/octet-stream";
+                    }
+                    var bytes = await System.IO.File.ReadAllBytesAsync(docToDownload.DocumentPath);
+                    return File(bytes, contentType, Path.GetFileName(docToDownload.DocumentPath));
                 }
-                var bytes = await System.IO.File.ReadAllBytesAsync(docToDownload.DocumentPath);
-                return File(bytes, contentType, Path.GetFileName(docToDownload.DocumentPath));
+                catch (Exception)
+                {
+                    return StatusCode(500);
+                }
             }
-            catch (Exception)
+            else
             {
-                return StatusCode(500);
+                return StatusCode(401, "Document not linked to any of user's relationships.");
             }
+
         }
 
         [HttpDelete("delete"), Authorize]
@@ -108,7 +118,7 @@ namespace capstoneBackend.Controllers
                 }
                 else
                 {
-                    return StatusCode(403);
+                    return StatusCode(401, "Document not linked to any of user's relationships.");
                 }
                 
             }

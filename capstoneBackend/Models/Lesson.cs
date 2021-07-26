@@ -16,6 +16,7 @@ namespace capstoneBackend.Models
         public string Comments { get; set; }
         public float FeeAmount { get; set; }
         public string Location { get; set; }
+        public bool ChargeStudent { get; set; }
         public bool isNoShow { get; set; }
 
         [ForeignKey("RelationshipId")]

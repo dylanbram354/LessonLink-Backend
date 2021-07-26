@@ -8,5 +8,7 @@ namespace capstoneBackend.Models
         public string LastName { get; set; }
         public string ParentEmail { get; set; }
         public string PreferredContact { get; set; }
+
+        public float Balance { get; set; }
     }
 }
