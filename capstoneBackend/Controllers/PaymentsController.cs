@@ -112,5 +112,13 @@ namespace capstoneBackend.Controllers
                 return StatusCode(404);
             }
         }
+
+        [HttpGet("methods")]
+
+        public IActionResult GetPaymentMethods()
+        {
+            var methods = _context.PaymentMethods;
+            return Ok(methods);
+        }
     }
 }

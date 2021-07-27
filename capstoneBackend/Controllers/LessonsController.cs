@@ -39,7 +39,7 @@ namespace capstoneBackend.Controllers
 
         public IActionResult GetLessonById(int lessonId)
         {
-            var lesson = _context.Lessons.Where(l => l.LessonId == lessonId).SingleOrDefault();
+            var lesson = _context.Lessons.Where(l => l.LessonId == lessonId).Include(l => l.Relationship.Student).Include(l => l.Relationship.Teacher).SingleOrDefault();
             return Ok(lesson);
         }
 
@@ -48,7 +48,7 @@ namespace capstoneBackend.Controllers
         {
             var userId = User.FindFirstValue("id");
             var relationshipId = _context.Relationships.Where(r => r.TeacherId == userId).Select(r => r.RelationshipId).SingleOrDefault();
-            var myLessons = _context.Lessons.Where(l => l.RelationshipId == relationshipId).ToList();
+            var myLessons = _context.Lessons.Include(l => l.Relationship.Student).Include(l => l.Relationship.Teacher).Where(l => l.RelationshipId == relationshipId).ToList();
             return Ok(myLessons);
         }
 
