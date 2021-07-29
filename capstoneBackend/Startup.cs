@@ -39,7 +39,8 @@ namespace capstoneBackend
                 {
                     builder.WithOrigins("http://localhost:3000").
                     AllowAnyMethod()
-                    .AllowAnyHeader();
+                    .AllowAnyHeader()
+                    .WithExposedHeaders("Content-Disposition");
                 });
             });
         }

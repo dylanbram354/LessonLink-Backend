@@ -69,12 +69,12 @@ namespace capstoneBackend.Controllers
             }
         }
 
-        [HttpGet("download"), Authorize]
-        public async Task<ActionResult> DownloadFile([FromBody] Document doc)
+        [HttpGet("download/{id}"), Authorize]
+        public async Task<ActionResult> DownloadFile(int id)
         {
             var userId = User.FindFirstValue("id");
             var userRelationshipIds = _context.Relationships.Where(r => r.StudentId == userId || r.TeacherId == userId).Select(r => r.RelationshipId).ToList();
-            var docToDownload = _context.Documents.Where(d => d.DocumentId == doc.DocumentId).SingleOrDefault();
+            var docToDownload = _context.Documents.Where(d => d.DocumentId == id).SingleOrDefault();
             if (userRelationshipIds.Contains(docToDownload.RelationshipId))
             {
                 var provider = new FileExtensionContentTypeProvider();
@@ -100,14 +100,14 @@ namespace capstoneBackend.Controllers
 
         }
 
-        [HttpDelete("delete"), Authorize]
-        public IActionResult DeleteFile([FromBody] Document doc)
+        [HttpDelete("delete/{id}"), Authorize]
+        public IActionResult DeleteFile(int id)
         {
             try
             {
                 var userId = User.FindFirstValue("id");
                 var userRelationshipIds = _context.Relationships.Where(r => r.StudentId == userId || r.TeacherId == userId).Select(r => r.RelationshipId).ToList();
-                var docToDelete = _context.Documents.Where(d => d.DocumentId == doc.DocumentId).SingleOrDefault();
+                var docToDelete = _context.Documents.Where(d => d.DocumentId == id).SingleOrDefault();
                 if (userRelationshipIds.Contains(docToDelete.RelationshipId))
                 {
                     string path = docToDelete.DocumentPath;
@@ -124,7 +124,7 @@ namespace capstoneBackend.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, doc);
+                return StatusCode(500, id);
             }
         }
 

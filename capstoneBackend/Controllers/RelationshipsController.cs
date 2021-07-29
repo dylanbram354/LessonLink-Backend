@@ -80,16 +80,16 @@ namespace Capstone_Backend.Controllers
             
         }
 
-        [HttpDelete("breakup"), Authorize]
+        [HttpDelete("breakup/{otherId}"), Authorize]
 
-        public IActionResult RemoveRelationship([FromBody] User partner)
+        public IActionResult RemoveRelationship(string otherId)
         {
             try
             {
                 if (User.IsInRole("Student"))
                 {
                     var userId = User.FindFirstValue("id");
-                    var relationship = _context.Relationships.Where(r => (r.StudentId == userId) && (r.TeacherId == partner.Id)).SingleOrDefault();
+                    var relationship = _context.Relationships.Where(r => (r.StudentId == userId) && (r.TeacherId == otherId)).SingleOrDefault();
                     if (relationship != null)
                     {
                         _context.Remove(relationship);
@@ -104,7 +104,7 @@ namespace Capstone_Backend.Controllers
                 else
                 {
                     var userId = User.FindFirstValue("id");
-                    var relationship = _context.Relationships.Where(r => (r.TeacherId == userId) && (r.StudentId == partner.Id)).SingleOrDefault();
+                    var relationship = _context.Relationships.Where(r => (r.TeacherId == userId) && (r.StudentId == otherId)).SingleOrDefault();
                     if (relationship != null)
                     {
                         _context.Remove(relationship);
@@ -133,7 +133,7 @@ namespace Capstone_Backend.Controllers
             {
                 return StatusCode(401, "Not your student.");
             }
-            relationship.Balance = body.Balance;
+            relationship.Balance = relationship.Balance + body.Balance;
             _context.SaveChanges();
             var returnInfo = _context.Relationships.Where(r => r.TeacherId == myId && r.StudentId == body.StudentId).Include(r => r.Teacher).Include(r => r.Student).Select(r => new
             {
@@ -145,6 +145,15 @@ namespace Capstone_Backend.Controllers
                 balance = r.Balance
             }).SingleOrDefault();
             return Ok(returnInfo);
+        }
+
+        [HttpGet("get_my"), Authorize]
+
+        public IActionResult GetMyRelationships()
+        {
+            var myId = User.FindFirstValue("id");
+            var relationships = _context.Relationships.Where(r => r.TeacherId == myId || r.StudentId == myId).Include(r => r.Teacher).Include(r => r.Student);
+            return Ok(relationships);
         }
 
     }

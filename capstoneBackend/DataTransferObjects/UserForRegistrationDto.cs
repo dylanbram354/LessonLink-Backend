@@ -12,6 +12,9 @@ namespace capstoneBackend.DataTransferObjects
         public string Password { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
+        public string PreferredContact { get; set; }
+        public string ParentEmail { get; set; }
+        public string ParentPhone { get; set; }
 
         public string Role { get; set; }
     }

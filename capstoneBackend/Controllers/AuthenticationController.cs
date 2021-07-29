@@ -25,7 +25,7 @@ namespace capstoneBackend.Controllers
 
         [HttpPost()]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
-        public async Task<IActionResult> RegisterTeacher([FromBody] UserForRegistrationDto userForRegistration)
+        public async Task<IActionResult> Register([FromBody] UserForRegistrationDto userForRegistration)
         {
 
             var user = _mapper.Map<User>(userForRegistration);

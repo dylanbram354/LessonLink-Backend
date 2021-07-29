@@ -47,9 +47,17 @@ namespace capstoneBackend.Controllers
         public IActionResult GetMyLessons()
         {
             var userId = User.FindFirstValue("id");
-            var relationshipId = _context.Relationships.Where(r => r.TeacherId == userId).Select(r => r.RelationshipId).SingleOrDefault();
-            var myLessons = _context.Lessons.Include(l => l.Relationship.Student).Include(l => l.Relationship.Teacher).Where(l => l.RelationshipId == relationshipId).ToList();
+            var relationshipIds = _context.Relationships.Where(r => r.TeacherId == userId || r.StudentId == userId).Select(r => r.RelationshipId).ToList();
+            var myLessons = _context.Lessons.Include(l => l.Relationship.Student).Include(l => l.Relationship.Teacher).Where(l => relationshipIds.Contains(l.RelationshipId)).ToList();
             return Ok(myLessons);
+        }
+
+        [HttpGet("relationshipId={relationshipId}"), Authorize]
+
+        public IActionResult GetLessonsByRelationshipId(int relationshipId)
+        {
+            var lessons = _context.Lessons.Where(l => l.RelationshipId == relationshipId);
+            return Ok(lessons);
         }
 
         [HttpPut("edit/{lessonId}"), Authorize(Roles = "Teacher")]
