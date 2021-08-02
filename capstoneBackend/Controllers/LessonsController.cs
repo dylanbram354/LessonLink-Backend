@@ -88,18 +88,10 @@ namespace capstoneBackend.Controllers
         public IActionResult DeleteLessonById(int lessonId)
         {
             var userId = User.FindFirstValue("id");
-            var relationshipId = _context.Relationships.Where(r => r.TeacherId == userId).Select(r => r.RelationshipId).SingleOrDefault();
             var lessonToDelete = _context.Lessons.Where(l => l.LessonId == lessonId).SingleOrDefault();
-            if (lessonToDelete.RelationshipId == relationshipId)
-            {
-                _context.Remove(lessonToDelete);
-                _context.SaveChanges();
-                return StatusCode(204);
-            }
-            else
-            {
-                return StatusCode(403);
-            }
+            _context.Remove(lessonToDelete);
+            _context.SaveChanges();
+            return StatusCode(204);
         }
     }
 }

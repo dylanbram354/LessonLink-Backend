@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Stripe;
 
 namespace capstoneBackend.Controllers
 {
@@ -26,20 +28,31 @@ namespace capstoneBackend.Controllers
 
         public class PaymentSubmission
         {
-            public string StudentId { get; set; }
+            public string PersonId { get; set; }
             public int MethodId { get; set; }
             public float Amount { get; set; }
         }
 
-        [HttpPost, Authorize(Roles = "Teacher")]
+        [HttpPost, Authorize]
 
         public IActionResult PostNewPayment([FromBody] PaymentSubmission paymentSubmission)
         {
             var myId = User.FindFirstValue("id");
-            var relationshipId = _context.Relationships.Where(r => r.TeacherId == myId && r.StudentId == paymentSubmission.StudentId).Select(r => r.RelationshipId).SingleOrDefault();
-            var relationship = _context.Relationships.Where(r => r.RelationshipId == relationshipId).SingleOrDefault();
-            var student = _context.Relationships.Where(r => r.RelationshipId == relationshipId).Include(r => r.Student).Select(r => r.Student).SingleOrDefault();
+            int relationshipId = 0;
             var date = DateTime.Now;
+            Relationship relationship = null;
+            if (User.IsInRole("Teacher"))
+            {
+                relationshipId = _context.Relationships.Where(r => r.TeacherId == myId && r.StudentId == paymentSubmission.PersonId).Select(r => r.RelationshipId).SingleOrDefault();
+                relationship = _context.Relationships.Where(r => r.RelationshipId == relationshipId).SingleOrDefault();
+                
+            }
+            else
+            {
+                relationshipId = _context.Relationships.Where(r => r.StudentId == myId && r.TeacherId == paymentSubmission.PersonId).Select(r => r.RelationshipId).SingleOrDefault();
+                relationship = _context.Relationships.Where(r => r.RelationshipId == relationshipId).SingleOrDefault();
+                paymentSubmission.MethodId = 3;
+            }
             if (relationshipId != 0)
             {
                 Payment payment = new Payment
