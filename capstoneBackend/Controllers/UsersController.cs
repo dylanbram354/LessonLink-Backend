@@ -56,7 +56,7 @@ namespace capstoneBackend.Controllers
         public IActionResult GetMyTeachers()
         {
             var myId = User.FindFirstValue("id");
-            var myTeachers = _context.Relationships.Where(r => r.StudentId == myId).Include(r => r.Teacher).Select(r => new { relationshipId = r.RelationshipId, teacher = r.Teacher });
+            var myTeachers = _context.Relationships.Where(r => r.StudentId == myId).Include(r => r.Teacher).Select(r => new { relationshipId = r.RelationshipId, balance = r.Balance, teacher = r.Teacher });
             return Ok(myTeachers);
         }
 
