@@ -17,5 +17,6 @@ namespace capstoneBackend.DataTransferObjects
         public string ParentPhone { get; set; }
 
         public string Role { get; set; }
+        public bool SetUpStripe { get; set; } = false;
     }
 }

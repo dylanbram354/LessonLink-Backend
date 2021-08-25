@@ -6,6 +6,7 @@ using capstoneBackend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Stripe;
 
 namespace capstoneBackend.Controllers
 {
@@ -16,12 +17,29 @@ namespace capstoneBackend.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
         private readonly IAuthenticationManager _authManager;
+        private readonly APIKeys _keys = new APIKeys();
         public AuthenticationController(IMapper mapper, UserManager<User> userManager, IAuthenticationManager authManager)
         {
             _mapper = mapper;
             _userManager = userManager;
             _authManager = authManager;
+            StripeConfiguration.ApiKey = _keys.STRIPE_KEY;
         }
+
+        public void StripeAccountSetup(UserForRegistrationDto userForRegistration)
+        {
+            var options = new AccountCreateOptions
+            {
+                Type = "standard",
+                Email = userForRegistration.Email,
+                BusinessType = "individual"
+            };
+
+            var service = new AccountService();
+            var account = service.Create(options);
+        }
+
+
 
         [HttpPost()]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
@@ -40,6 +58,12 @@ namespace capstoneBackend.Controllers
                 return BadRequest(ModelState);
             }
             await _userManager.AddToRoleAsync(user, userForRegistration.Role);
+
+            if (userForRegistration.SetUpStripe)
+            {
+                StripeAccountSetup(userForRegistration);
+            }
+
             return StatusCode(201, user);
         }
 
